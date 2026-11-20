@@ -15,8 +15,15 @@ pub struct Config {
     #[serde(default)]
     pub libre_key: String,
     pub interval_ms: u64,
+    /// Try several image clean-ups per frame and keep the best reading.
+    #[serde(default = "default_true")]
+    pub enhance: bool,
     /// Fractions of the window: [x, y, width, height].
     pub region: [f32; 4],
+}
+
+fn default_true() -> bool {
+    true
 }
 
 pub struct Translator {

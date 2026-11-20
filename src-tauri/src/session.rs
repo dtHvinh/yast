@@ -1,6 +1,7 @@
 use crate::{
     capture::{Capture, Flags, Shot},
-    ocr,
+    ensemble, ocr,
+    preprocess::Frame,
     translate::{Config, Translator},
 };
 use serde::Serialize;
@@ -124,11 +125,17 @@ fn run_worker(app: AppHandle, translator: Arc<Translator>, cfg: Config, rx: Rece
 
     // The channel closes when capture stops, which ends this loop.
     while let Ok(shot) = rx.recv() {
-        let lines = match ocr::recognize(&engine, &shot.data, shot.width, shot.height) {
-            Ok(l) => l,
-            Err(e) => {
-                let _ = app.emit("status-error", format!("OCR failed: {e}"));
-                continue;
+        let lines = if cfg.enhance {
+            // While nothing readable has been found, only every third frame gets the expensive extra passes.
+            let full = misses % 3 == 0;
+            ensemble::read(&cfg.source_lang, &Frame::new(shot.width, shot.height, shot.data), full)
+        } else {
+            match ocr::recognize(&engine, &shot.data, shot.width, shot.height) {
+                Ok(l) => l,
+                Err(e) => {
+                    let _ = app.emit("status-error", format!("OCR failed: {e}"));
+                    continue;
+                }
             }
         };
 

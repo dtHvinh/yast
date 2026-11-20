@@ -1,5 +1,10 @@
 mod capture;
+mod ensemble;
 mod ocr;
+#[cfg(test)]
+mod ocr_bench;
+mod preprocess;
+mod quality;
 mod session;
 mod translate;
 

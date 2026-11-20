@@ -28,6 +28,7 @@ export type CaptureConfig = {
   libreUrl: string
   libreKey: string
   intervalMs: number
+  enhance: boolean
   region: [number, number, number, number]
 }
 

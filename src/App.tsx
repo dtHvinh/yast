@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
+import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { LiveFeed } from "@/components/live-feed"
@@ -58,6 +59,7 @@ export default function App() {
   const [target, setTarget] = useStored("target", "en")
   const [regionId, setRegionId] = useStored("regionId", "bottom40")
   const [interval, setIntervalMs] = useStored("interval", 500)
+  const [enhance, setEnhance] = useStored("enhance", 1)
   const [provider, setProvider] = useStored("provider", "google")
   const [deeplKey, setDeeplKey] = useStored("deeplKey", "")
   const [libreUrl, setLibreUrl] = useStored("libreUrl", "")
@@ -117,6 +119,7 @@ export default function App() {
           libreUrl,
           libreKey,
           intervalMs: interval,
+          enhance: enhance === 1,
           region: [...region.rect],
         })
         setRunning(true)
@@ -202,6 +205,22 @@ export default function App() {
                 <p className="text-xs text-muted-foreground">
                   Limiting the area to where subtitles appear is faster and more accurate.
                 </p>
+              </div>
+
+              <div className="flex items-start justify-between gap-4 rounded-lg border bg-muted/20 p-3">
+                <div className="space-y-1">
+                  <Label htmlFor="enhance">Enhanced text detection</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Reads each frame several ways and keeps the best result. Much better on game fonts, outlines and busy
+                    backgrounds, but takes up to about a second per change. Turn off for fast-changing text.
+                  </p>
+                </div>
+                <Switch
+                  id="enhance"
+                  checked={enhance === 1}
+                  onCheckedChange={(on) => setEnhance(on ? 1 : 0)}
+                  disabled={running}
+                />
               </div>
             </CardContent>
           </Card>
