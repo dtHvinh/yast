@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Overlay</title>
+<style>
+  html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; pointer-events: none; user-select: none; }
+  #layer { position: fixed; inset: 0; }
+  .box {
+    position: absolute; box-sizing: border-box; padding: 2px 6px;
+    background: rgba(12, 12, 16, 0.96); color: #fff; border-radius: 4px;
+    font-family: "Segoe UI", system-ui, sans-serif; line-height: 1.2;
+    overflow: hidden; word-break: break-word;
+    display: flex; align-items: center;
+    text-shadow: 0 1px 2px rgba(0,0,0,.6);
+  }
+</style>
+</head>
+<body>
+<div id="layer"></div>
+<script>
+  const layer = document.getElementById('layer');
+
+  function render({ frameW, frameH, blocks }) {
+    layer.replaceChildren();
+    // OCR boxes are in captured-frame pixels; the overlay window is sized to the same area.
+    const sx = window.innerWidth / frameW;
+    const sy = window.innerHeight / frameH;
+
+    for (const b of blocks) {
+      const el = document.createElement('div');
+      el.className = 'box';
+      el.textContent = b.translated;
+      const w = b.w * sx + 12, h = b.h * sy + 4;
+      el.style.left = (b.x * sx - 6) + 'px';
+      el.style.top = (b.y * sy - 2) + 'px';
+      el.style.width = w + 'px';
+      el.style.height = h + 'px';
+      layer.appendChild(el);
+
+      // Start at roughly the original line height, then shrink until the translation fits.
+      let size = Math.max(10, (h / b.lines) * 0.8);
+      el.style.fontSize = size + 'px';
+      while (el.scrollHeight > el.clientHeight + 1 && size > 9) {
+        size -= 1;
+        el.style.fontSize = size + 'px';
+      }
+    }
+  }
+
+  window.__TAURI__.event.listen('ocr-result', e => render(e.payload));
+</script>
+</body>
+</html>
